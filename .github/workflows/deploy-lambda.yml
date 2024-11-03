@@ -1,4 +1,4 @@
-name: Deploy Lambda Function
+name: Deploy SAM Application
 
 on:
   push:
@@ -24,13 +24,17 @@ jobs:
         python -m pip install --upgrade pip
         pip install -r hello_world/requirements.txt  # Install dependencies from the specified path
 
-    - name: Package Lambda Function
+    - name: Install SAM CLI
       run: |
-        mkdir -p package  # Create a package directory
-        cp -r hello_world/* package/  # Copy code and dependencies to the package directory
-        cd package
-        zip -r ../lambda_function.zip .  # Package the Lambda function and dependencies
-        cd ..
+        pip install aws-sam-cli  # Install the AWS SAM CLI
+
+    - name: Package SAM Application
+      run: |
+        # Package the application using SAM CLI
+        sam package \
+          --template-file template.yaml \  # Specify your SAM template file
+          --output-template-file packaged.yaml \
+          --s3-bucket your-s3-bucket-name  # Replace with your S3 bucket name
 
     - name: Configure AWS Credentials
       uses: aws-actions/configure-aws-credentials@v2
@@ -39,8 +43,9 @@ jobs:
         aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
         aws-region: ${{ secrets.AWS_REGION }}
 
-    - name: Deploy to AWS Lambda
+    - name: Deploy SAM Application
       run: |
-        aws lambda update-function-code \
-          --function-name my-lambda-function-name \  # Replace with your Lambda function's name
-          --zip-file fileb://lambda_function.zip
+        sam deploy \
+          --template-file packaged.yaml \
+          --stack-name your-stack-name \  # Replace with your CloudFormation stack name
+          --capabilities CAPABILITY_IAM  # Required if your stack creates IAM roles
