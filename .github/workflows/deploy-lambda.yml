@@ -35,21 +35,10 @@ jobs:
         aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
         aws-region: ${{ secrets.AWS_REGION }}  # Ensure this secret is set
 
-    - name: Package SAM Application
-      env:
-        AWS_DEFAULT_REGION: ${{ secrets.AWS_REGION }}  # Pass the region as an environment variable
+    - name: Build SAM Application
       run: |
-        # Package the application using SAM CLI
-        sam package \
-          --template-file template.yaml \  # Specify your SAM template file
-          --output-template-file packaged.yaml \
-          --s3-bucket your-s3-bucket-name  # Replace with your S3 bucket name
+        sam build  # Build the SAM application
 
     - name: Deploy SAM Application
-      env:
-        AWS_DEFAULT_REGION: ${{ secrets.AWS_REGION }}  # Ensure region is available for deployment
       run: |
-        sam deploy \
-          --template-file packaged.yaml \
-          --stack-name your-stack-name \  # Replace with your CloudFormation stack name
-          --capabilities CAPABILITY_IAM  # Required if your stack creates IAM roles
+        sam deploy --config-file samconfig.toml  # Deploy using the configurations in samconfig.toml
