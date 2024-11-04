@@ -40,5 +40,24 @@ jobs:
         sam build  # Build the SAM application
 
     - name: Deploy SAM Application
+      id: deploy
       run: |
-        yes | sam deploy --config-file samconfig.toml  # Automatically provide "y" for confirmation
+        yes | sam deploy --config-file samconfig.toml --no-confirm  # Automatically provide "y" for confirmation
+
+    - name: Get API Gateway URL
+      id: get-url
+      run: |
+        # Get the API Gateway URL from the CloudFormation stack outputs
+        echo "API_GATEWAY_URL=$(aws cloudformation describe-stacks --stack-name your-stack-name --query "Stacks[0].Outputs[?OutputKey=='HelloWorldApi'].OutputValue" --output text)" >> $GITHUB_ENV
+
+    - name: Display API Gateway URL
+      run: |
+        echo "API Gateway URL: $API_GATEWAY_URL"
+
+    - name: Comment on Pull Request
+      if: github.event_name == 'pull_request'
+      uses: peter-evans/create-or-update-comment@v1
+      with:
+        issue-number: ${{ github.event.pull_request.number }}
+        body: |
+          **API Gateway URL:** [$API_GATEWAY_URL](API_GATEWAY_URL)
