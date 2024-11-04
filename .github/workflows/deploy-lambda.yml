@@ -28,14 +28,6 @@ jobs:
       run: |
         pip install aws-sam-cli  # Install the AWS SAM CLI
 
-    - name: Package SAM Application
-      run: |
-        # Package the application using SAM CLI
-        sam package \
-          --template-file template.yaml \  # Specify your SAM template file
-          --output-template-file packaged.yaml \
-          --s3-bucket your-s3-bucket-name  # Replace with your S3 bucket name
-
     - name: Configure AWS Credentials
       uses: aws-actions/configure-aws-credentials@v2
       with:
@@ -43,9 +35,19 @@ jobs:
         aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
         aws-region: ${{ secrets.AWS_REGION }}  # Ensure this secret is set
 
+    - name: Package SAM Application
+      env:
+        AWS_DEFAULT_REGION: ${{ secrets.AWS_REGION }}  # Pass the region as an environment variable
+      run: |
+        # Package the application using SAM CLI
+        sam package \
+          --template-file template.yaml \  # Specify your SAM template file
+          --output-template-file packaged.yaml \
+          --s3-bucket your-s3-bucket-name  # Replace with your S3 bucket name
+
     - name: Deploy SAM Application
-      env:  # Pass the AWS region as an environment variable
-        AWS_DEFAULT_REGION: ${{ secrets.AWS_REGION }}
+      env:
+        AWS_DEFAULT_REGION: ${{ secrets.AWS_REGION }}  # Ensure region is available for deployment
       run: |
         sam deploy \
           --template-file packaged.yaml \
