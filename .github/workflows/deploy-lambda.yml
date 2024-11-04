@@ -43,16 +43,9 @@ jobs:
       run: |
         yes | sam deploy --config-file samconfig.toml  # Automatically provide "y" for confirmation
 
-    - name: Get Stack Name from samconfig.toml
-      id: get-stack-name
-      run: |
-        # Extract the stack name from the samconfig.toml file
-        STACK_NAME=$(grep 'stack_name' samconfig.toml | awk -F ' = ' '{print $2}')
-        echo "STACK_NAME=${STACK_NAME}" >> $GITHUB_ENV
-
     - name: Get API Gateway URL
       id: get-url
       run: |
         # Use the retrieved stack name to get the API Gateway URL
-        API_GATEWAY_URL=$(aws cloudformation describe-stacks --stack-name $STACK_NAME --query "Stacks[0].Outputs[?OutputKey=='HelloWorldApi'].OutputValue" --output text)
+        API_GATEWAY_URL=$(aws cloudformation describe-stacks --stack-name 'sam-app' --query "Stacks[0].Outputs[?OutputKey=='HelloWorldApi'].OutputValue" --output text)
         echo "API_GATEWAY_URL=${API_GATEWAY_URL}" >> $GITHUB_ENV
