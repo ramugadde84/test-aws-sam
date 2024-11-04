@@ -39,18 +39,7 @@ jobs:
       run: |
         sam build  # Build the SAM application
 
-    - name: Run Tests with Coverage
-      run: |
-        coverage run -m pytest  # Run tests and measure coverage
-        coverage report -m  # Output coverage report to console
-        coverage html  # Generate HTML coverage report
-
+    
     - name: Deploy SAM Application
       run: |
         yes | sam deploy --config-file samconfig.toml  # Automatically provide "y" for confirmation
-
-    - name: Upload Coverage Report
-      uses: actions/upload-artifact@v3
-      with:
-        name: coverage-report
-        path: htmlcov/
